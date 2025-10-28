@@ -12,13 +12,15 @@ import { AuthModule } from './auth/auth.module';
       envFilePath: '.env.example',
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        url: config.get<string>('DATABASE_URL'),
-        autoLoadEntities: true,
-        migrations: ['dist/migrations/*.js'],
-        synchronize: false,
-      }),
+      useFactory: (config: ConfigService) => {
+        return {
+          type: 'postgres',
+          url: config.get<string>('DATABASE_URL'),
+          autoLoadEntities: true,
+          migrations: ['dist/migrations/*.js'],
+          synchronize: false,
+        };
+      },
       inject: [ConfigService],
     }),
     AuthModule,
