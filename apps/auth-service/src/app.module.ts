@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { User } from './auth/entity/user.entity';
 import { DataSource } from 'typeorm';
 
 @Module({
@@ -18,7 +19,7 @@ import { DataSource } from 'typeorm';
           type: 'postgres',
           url: config.get<string>('DATABASE_URL'),
           autoLoadEntities: true,
-          entities: [],
+          entities: [User],
           migrations: ['dist/migrations/*.js'],
           synchronize: false,
         };
