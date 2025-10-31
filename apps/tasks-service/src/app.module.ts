@@ -24,6 +24,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
