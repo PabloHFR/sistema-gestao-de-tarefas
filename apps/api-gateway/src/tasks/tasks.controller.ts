@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -6,7 +7,9 @@ import {
   Inject,
   NotFoundException,
   Param,
+  Post,
   Query,
+  Req,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -24,6 +27,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ListTasksQueryDto } from './dto/lists-tasks-query.dto';
 import { PaginatedTasksResponseDto } from './dto/paginated-tasks-response.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { CreateTaskResponseDto } from './dto/create-task-response.dto';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -109,5 +114,30 @@ export class TasksController {
     if (!task) throw new NotFoundException('Tarefa não encontrada');
 
     return task;
+  }
+
+  // POST /api/tasks
+  // Cria uma nova tarefa
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Cria uma nova tarefa' })
+  @ApiResponse({
+    status: 201,
+    description: 'Tarefa criada com sucesso',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos',
+  })
+  async create(
+    @Body(ValidationPipe) createTaskDto: CreateTaskDto,
+    @Req() req: { user: { userId: string; username: string } },
+  ) {
+    return await firstValueFrom(
+      this.tasksClient.send<CreateTaskResponseDto>('tasks.create', {
+        createTaskDto,
+        user: req.user,
+      }),
+    );
   }
 }

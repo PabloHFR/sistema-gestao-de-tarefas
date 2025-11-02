@@ -1,16 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Like, Repository } from 'typeorm';
 
 import { Task } from './entity/tasks.entity';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { FilterTasksDto } from './dto/filter-tasks.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { HistoryAction, TaskHistory } from './entity/task-history.entity';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class TasksService {
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
+
+    @InjectRepository(TaskHistory)
+    private historyRepository: Repository<TaskHistory>,
+
+    // Cliente RabbitMQ para publicar eventos
+    @Inject('EVENTS_SERVICE')
+    private eventsClient: ClientProxy,
   ) {}
 
   // Lista todas as tarefas com paginação e filtros
@@ -86,5 +96,55 @@ export class TasksService {
     }
 
     return task;
+  }
+
+  // Cria uma nova tarefa
+  async create(
+    createTaskDto: CreateTaskDto,
+    user: { userId: string; username: string },
+  ) {
+    // Cria a entidade
+    const task = this.taskRepository.create({
+      ...createTaskDto,
+      createdBy: user.userId,
+      assignedTo: createTaskDto.assignedTo || [],
+    });
+
+    // Salva no banco
+    await this.taskRepository.save(task);
+
+    // Registra no histórico
+    await this.createHistory({
+      taskId: task.id,
+      action: HistoryAction.CREATED,
+      userId: user.userId,
+      username: user.username,
+      newValue: JSON.stringify(task),
+    });
+
+    // Publica evento para o broker (notification-service vai consumir)
+    this.eventsClient.emit('task.created', {
+      taskId: task.id,
+      title: task.title,
+      createdBy: user.userId,
+      assignedTo: task.assignedTo,
+      timestamp: new Date().toISOString(),
+    });
+
+    return task;
+  }
+
+  // Cria registro de histórico
+  private async createHistory(data: {
+    taskId: string;
+    action: HistoryAction;
+    userId: string;
+    username: string;
+    field?: string;
+    oldValue?: string;
+    newValue: string;
+  }) {
+    const history = this.historyRepository.create(data);
+    await this.historyRepository.save(history);
   }
 }

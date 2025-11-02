@@ -3,6 +3,7 @@ import { TasksService } from './tasks.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { FilterTasksDto } from './dto/filter-tasks.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -29,5 +30,20 @@ export class TasksController {
     },
   ) {
     return await this.tasksService.findOne(payload.id);
+  }
+
+  // Cria uma nova tarefa
+  @MessagePattern('tasks.create')
+  async create(
+    @Payload()
+    payload: {
+      createTaskDto: CreateTaskDto;
+      user: {
+        userId: string;
+        username: string;
+      };
+    },
+  ) {
+    return await this.tasksService.create(payload.createTaskDto, payload.user);
   }
 }

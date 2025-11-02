@@ -78,7 +78,7 @@ export class CreateTaskDto {
     required: false,
   })
   @IsArray({ message: 'assignedTo deve ser um array' })
-  @IsUUID('4', {
+  @IsUUID('all', {
     each: true,
     message: 'Cada ID de usuário deve ser UUID válido',
   })
