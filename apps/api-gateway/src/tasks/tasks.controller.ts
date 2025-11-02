@@ -4,6 +4,8 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  NotFoundException,
+  Param,
   Query,
   UseGuards,
   ValidationPipe,
@@ -12,6 +14,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -20,6 +23,7 @@ import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ListTasksQueryDto } from './dto/lists-tasks-query.dto';
 import { PaginatedTasksResponseDto } from './dto/paginated-tasks-response.dto';
+import { TaskResponseDto } from './dto/task-response.dto';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -81,5 +85,29 @@ export class TasksController {
         filters,
       }),
     );
+  }
+
+  // GET /api/tasks/:id
+  // Busca uma tarefa específica
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Busca uma tarefa por ID' })
+  @ApiParam({ name: 'id', type: String, description: 'UUID da tarefa' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tarefa encontrada',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Tarefa não encontrada',
+  })
+  async findOne(@Param('id') id: string) {
+    const task = await firstValueFrom<TaskResponseDto>(
+      this.tasksClient.send('tasks.findOne', { id }),
+    );
+
+    if (!task) throw new NotFoundException('Tarefa não encontrada');
+
+    return task;
   }
 }

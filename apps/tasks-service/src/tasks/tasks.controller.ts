@@ -19,4 +19,15 @@ export class TasksController {
   ) {
     return await this.tasksService.findAll(payload.pagination, payload.filters);
   }
+
+  // Lista uma tarefa específica
+  @MessagePattern('tasks.findOne')
+  async findOne(
+    @Payload()
+    payload: {
+      id: string;
+    },
+  ) {
+    return await this.tasksService.findOne(payload.id);
+  }
 }

@@ -71,4 +71,20 @@ export class TasksService {
       totalPages: Math.ceil(total / size),
     };
   }
+
+  // Lista uma tarefa específica
+  async findOne(id: string) {
+    const task = await this.taskRepository.findOne({
+      where: {
+        id,
+      },
+      relations: ['comments', 'history'], // Carrega relacionamentos
+    });
+
+    if (!task) {
+      return null;
+    }
+
+    return task;
+  }
 }
