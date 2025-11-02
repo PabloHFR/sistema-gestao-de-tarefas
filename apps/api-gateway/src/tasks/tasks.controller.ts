@@ -34,6 +34,7 @@ import { CreateTaskResponseDto } from './dto/create-task-response.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CommentsQueryDto } from './dto/comments-query.dto';
 import { CommentResponseDto } from './dto/comment-response.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -232,6 +233,32 @@ export class TasksController {
       this.tasksClient.send('tasks.comments.findAll', {
         taskId,
         pagination,
+      }),
+    );
+  }
+
+  @Post(':id/comments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Cria um comentário em uma tarefa' })
+  @ApiParam({ name: 'id', type: String, description: 'UUID da tarefa' })
+  @ApiResponse({
+    status: 201,
+    description: 'Comentário criado com sucesso',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Tarefa não encontrada',
+  })
+  async createComment(
+    @Param('id') taskId: string,
+    @Body(ValidationPipe) createCommentDto: CreateCommentDto,
+    @Req() req: { user: { userId: string; username: string } },
+  ) {
+    return await firstValueFrom<CommentResponseDto>(
+      this.tasksClient.send('tasks.comments.create', {
+        taskId,
+        createCommentDto,
+        user: req.user,
       }),
     );
   }

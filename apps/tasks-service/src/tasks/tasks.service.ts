@@ -15,6 +15,7 @@ import { HistoryAction, TaskHistory } from './entity/task-history.entity';
 import { ClientProxy } from '@nestjs/microservices';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Comment } from './entity/comment.entity';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class TasksService {
@@ -248,6 +249,52 @@ export class TasksService {
       size,
       totalPages: Math.ceil(total / size),
     };
+  }
+
+  // Cria comentário
+  async createComment(
+    taskId: string,
+    createCommentDto: CreateCommentDto,
+    user: { userId: string; username: string },
+  ) {
+    // Verifica se task existe
+    const task = await this.findOne(taskId);
+
+    if (!task) {
+      throw new NotFoundException('Tarefa não encontrada');
+    }
+
+    // Cria comentário
+    const comment = this.commentRepository.create({
+      ...createCommentDto,
+      taskId,
+      authorId: user.userId,
+      authorName: user.username,
+    });
+
+    await this.commentRepository.save(comment);
+
+    // Registra no histórico
+    await this.createHistory({
+      taskId,
+      action: HistoryAction.COMMENTED,
+      userId: user.userId,
+      username: user.username,
+      newValue: createCommentDto.content,
+    });
+
+    // Publica evento
+    this.eventsClient.emit('task.comment.created', {
+      taskId,
+      commentId: comment.id,
+      authorId: user.userId,
+      authorName: user.username,
+      content: comment.content,
+      assignedTo: task.assignedTo,
+      timestamp: new Date().toISOString(),
+    });
+
+    return comment;
   }
 
   // Cria registro de histórico

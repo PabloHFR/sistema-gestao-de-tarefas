@@ -5,6 +5,7 @@ import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { FilterTasksDto } from './dto/filter-tasks.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -92,6 +93,23 @@ export class TasksController {
     return await this.tasksService.findComments(
       payload.taskId,
       payload.pagination,
+    );
+  }
+
+  // Cria comentário
+  @MessagePattern('tasks.comments.create')
+  async createComment(
+    @Payload()
+    payload: {
+      taskId: string;
+      createCommentDto: CreateCommentDto;
+      user: { userId: string; username: string };
+    },
+  ) {
+    return await this.tasksService.createComment(
+      payload.taskId,
+      payload.createCommentDto,
+      payload.user,
     );
   }
 }
