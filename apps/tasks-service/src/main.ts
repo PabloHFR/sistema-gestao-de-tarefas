@@ -20,7 +20,7 @@ async function bootstrap() {
       transport: Transport.RMQ,
       options: {
         urls: [rabbitUrl],
-        queue: 'tasks-queue',
+        queue: 'tasks_queue',
         queueOptions: {
           durable: false,
         },
