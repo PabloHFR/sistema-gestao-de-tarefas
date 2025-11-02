@@ -67,4 +67,16 @@ export class TasksController {
       payload.user,
     );
   }
+
+  // Deleta tarefa
+  @MessagePattern('tasks.delete')
+  async delete(
+    @Payload()
+    payload: {
+      id: string;
+      userId: string;
+    },
+  ) {
+    return await this.tasksService.delete(payload.id, payload.userId);
+  }
 }

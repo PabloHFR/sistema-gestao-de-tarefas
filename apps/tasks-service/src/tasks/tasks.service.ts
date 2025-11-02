@@ -203,6 +203,26 @@ export class TasksService {
     return task;
   }
 
+  // Deleta uma tarefa
+  async delete(id: string, userId: string) {
+    const task = await this.findOne(id);
+
+    if (!task) {
+      throw new NotFoundException('Tarefa não encontrada');
+    }
+
+    // Apenas criador pode deletar
+    if (task.createdBy !== userId) {
+      throw new ForbiddenException(
+        'Você não tem permissão para deletar esta tarefa',
+      );
+    }
+
+    await this.taskRepository.remove(task);
+
+    return { message: 'Tarefa deletada com sucesso' };
+  }
+
   // Cria registro de histórico
   private async createHistory(data: {
     taskId: string;

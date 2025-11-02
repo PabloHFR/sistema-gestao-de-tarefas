@@ -13,6 +13,7 @@ import {
   Req,
   UseGuards,
   ValidationPipe,
+  Delete,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -171,6 +172,36 @@ export class TasksController {
         id,
         updateTaskDto,
         user: req.user,
+      }),
+    );
+  }
+
+  // DELETE /api/tasks/:id
+  // Deleta uma tarefa
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Deleta uma tarefa' })
+  @ApiParam({ name: 'id', type: String, description: 'UUID da tarefa' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tarefa deletada com sucesso',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sem permissão para deletar esta tarefa',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Tarefa não encontrada',
+  })
+  async delete(
+    @Param('id') id: string,
+    @Req() req: { user: { userId: string } },
+  ) {
+    return await firstValueFrom<{ message: string }>(
+      this.tasksClient.send('tasks.delete', {
+        id,
+        userId: req.user.userId,
       }),
     );
   }
