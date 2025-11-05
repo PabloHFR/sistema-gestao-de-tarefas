@@ -1,4 +1,4 @@
-import { NotificationHistoryResponse } from "../notifications/types";
+import type { NotificationHistoryResponse } from "../notifications/types";
 
 export interface LoginRequest {
   identifier: string; // email ou username
