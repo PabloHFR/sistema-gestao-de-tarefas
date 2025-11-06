@@ -20,7 +20,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         autoLoadEntities: true,
         entities: [],
         migrations: ['dist/migrations/*.js'],
-        synchronize: false,
+        synchronize: true,
       }),
       inject: [ConfigService],
     }),

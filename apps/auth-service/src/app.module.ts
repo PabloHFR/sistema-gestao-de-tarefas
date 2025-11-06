@@ -20,7 +20,7 @@ import { User } from './auth/entity/user.entity';
           autoLoadEntities: true,
           entities: [User],
           migrations: ['dist/migrations/*.js'],
-          synchronize: false,
+          synchronize: true,
         };
       },
       inject: [ConfigService],

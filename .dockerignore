@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+build
+**/build
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+
+# Git
+.git
+.gitignore
+
+# Env files (não copiar para imagem)
+.env
+.env.local
+.env.*.local
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Misc
+*.md
+!README.md
+.editorconfig

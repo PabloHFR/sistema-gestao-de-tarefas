@@ -1,0 +1,176 @@
+version: "3.8"
+
+services:
+  # ============================================
+  # FRONTEND - React SPA
+  # ============================================
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    ports:
+      - "5173:80"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - challenge-network
+    depends_on:
+      - api-gateway
+
+  # ============================================
+  # API GATEWAY - Entrada HTTP
+  # ============================================
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: .
+      dockerfile: ./apps/api-gateway/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - JWT_SECRET=super-secret-jwt-key-change-in-production
+      - JWT_ACCESS_EXPIRATION=15m
+      - JWT_REFRESH_EXPIRATION=7d
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - challenge-network
+    restart: unless-stopped
+
+  # ============================================
+  # AUTH SERVICE - Autenticação
+  # ============================================
+  auth-service:
+    container_name: auth-service
+    build:
+      context: .
+      dockerfile: ./apps/auth-service/Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - DATABASE_URL=postgresql://postgres:password@db:5432/challenge_db
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - JWT_SECRET=super-secret-jwt-key-change-in-production
+      - JWT_ACCESS_EXPIRATION=15m
+      - JWT_REFRESH_EXPIRATION=7d
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - challenge-network
+    restart: unless-stopped
+
+  # ============================================
+  # TASKS SERVICE - Gerenciamento de Tarefas
+  # ============================================
+  tasks-service:
+    container_name: tasks-service
+    build:
+      context: .
+      dockerfile: ./apps/tasks-service/Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - DATABASE_URL=postgresql://postgres:password@db:5432/challenge_db
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - challenge-network
+    restart: unless-stopped
+
+  # ============================================
+  # NOTIFICATIONS SERVICE - WebSocket + Eventos
+  # ============================================
+  notifications-service:
+    container_name: notifications-service
+    build:
+      context: .
+      dockerfile: ./apps/notifications-service/Dockerfile
+    ports:
+      - "3004:3004"
+      - "3005:3005" # WebSocket
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - WS_PORT=3005
+      - DATABASE_URL=postgresql://postgres:password@db:5432/challenge_db
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - challenge-network
+    restart: unless-stopped
+
+  # ============================================
+  # POSTGRESQL - Banco de Dados
+  # ============================================
+  db:
+    image: postgres:17-alpine
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: challenge_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - challenge-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # RABBITMQ - Message Broker
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - challenge-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+networks:
+  challenge-network:
+    driver: bridge

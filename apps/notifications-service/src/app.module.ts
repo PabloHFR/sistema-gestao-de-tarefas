@@ -22,7 +22,7 @@ import { NotificationsModule } from './notifications/notifications.module';
         autoLoadEntities: true,
         entities: [Notification],
         migrations: ['dist/migrations/*.js'],
-        synchronize: false,
+        synchronize: true,
         logging: true,
       }),
       inject: [ConfigService],

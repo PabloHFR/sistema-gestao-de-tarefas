@@ -72,7 +72,7 @@ export class CreateTaskDto {
   status?: TaskStatus;
 
   @ApiProperty({
-    example: ['123e4567-e89b-12d3-a456-426614174000'],
+    example: [''],
     description: 'IDs dos usuários atribuídos à tarefa',
     type: [String],
     required: false,
