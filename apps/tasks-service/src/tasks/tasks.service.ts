@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Like, Repository } from 'typeorm';
-import { HistoryAction } from '@monorepo/types';
 
 import { Task } from './entity/tasks.entity';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
@@ -17,6 +16,15 @@ import { ClientProxy } from '@nestjs/microservices';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Comment } from './entity/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+
+export enum HistoryAction {
+  CREATED = 'CREATED',
+  UPDATED = 'UPDATED',
+  STATUS_CHANGED = 'STATUS_CHANGED',
+  ASSIGNED = 'ASSIGNED',
+  UNASSIGNED = 'UNASSIGNED',
+  COMMENTED = 'COMMENTED',
+}
 
 @Injectable()
 export class TasksService {

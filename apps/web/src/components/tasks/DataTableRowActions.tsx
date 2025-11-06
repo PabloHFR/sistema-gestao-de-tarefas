@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,8 +8,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { Row } from "@tanstack/react-table";
+import type { Task } from "@monorepo/types";
+import { DeleteTaskDialog } from "./DeleteTaskDialog";
+import { EditTaskDialog } from "./EditTaskDialog";
 
-export function DataTableRowActions() {
+interface DataTableRowActionsProps<TData> {
+  row: Row<TData>;
+}
+
+export function DataTableRowActions<TData>({
+  row,
+}: DataTableRowActionsProps<TData>) {
+  const task = row.original as Task;
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   return (
     <>
       <DropdownMenu>
@@ -22,19 +37,32 @@ export function DataTableRowActions() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
-          <DropdownMenuItem onClick={() => {}}>
+          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
             <Pencil />
             Editar
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => {}} className="text-destructive">
+          <DropdownMenuItem
+            onClick={() => setShowDeleteDialog(true)}
+            className="text-destructive"
+          >
             <Trash2 />
             Deletar
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Dialogs */}
+      <EditTaskDialog
+        task={task}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+      />
+
+      <DeleteTaskDialog
+        task={task}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+      />
     </>
   );
 }

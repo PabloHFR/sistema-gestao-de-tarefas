@@ -6,8 +6,16 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { HistoryAction } from '@monorepo/types';
 import { Task } from './tasks.entity';
+
+export enum HistoryAction {
+  CREATED = 'CREATED',
+  UPDATED = 'UPDATED',
+  STATUS_CHANGED = 'STATUS_CHANGED',
+  ASSIGNED = 'ASSIGNED',
+  UNASSIGNED = 'UNASSIGNED',
+  COMMENTED = 'COMMENTED',
+}
 
 @Entity('task_history')
 export class TaskHistory {

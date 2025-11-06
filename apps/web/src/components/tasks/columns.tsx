@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { TaskPriority, TaskStatus } from "@monorepo/types";
 import type { Task } from "@monorepo/types";
-// import { DataTableRowActions } from "./DataTableRowActions";
+import { DataTableRowActions } from "./DataTableRowActions";
 
 // Configurações de badge para status
 const statusConfig = {
@@ -129,8 +129,8 @@ export const columns: ColumnDef<Task>[] = [
       );
     },
   },
-  // {
-  //   id: "actions",
-  //   cell: ({ row }) => <DataTableRowActions row={row} />,
-  // },
+  {
+    id: "actions",
+    cell: ({ row }) => <DataTableRowActions row={row} />,
+  },
 ];

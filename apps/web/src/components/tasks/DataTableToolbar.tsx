@@ -6,6 +6,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { DataTableFacetedFilter } from "./DataTableFacetedFilter";
 import { TaskPriority, TaskStatus } from "@monorepo/types";
+import { CreateTaskDialog } from "./CreateTaskDialog";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -65,13 +66,12 @@ export function DataTableToolbar<TData>({
         search: {
           ...searchParams,
           search: searchValue || undefined,
-          page: 1,
         },
       });
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [navigate, searchParams, searchValue]);
+  }, [searchValue]);
 
   const isFiltered =
     searchParams.search || searchParams.status || searchParams.priority;
@@ -152,7 +152,7 @@ export function DataTableToolbar<TData>({
       </div>
 
       <div className="flex items-center space-x-2">
-        {/* CreateTaskDialog */}
+        <CreateTaskDialog />
       </div>
     </div>
   );
