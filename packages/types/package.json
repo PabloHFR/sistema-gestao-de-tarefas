@@ -10,5 +10,8 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "devDependencies": {
+    "@monorepo/tsconfig": "workspace:*"
+  }
 }
