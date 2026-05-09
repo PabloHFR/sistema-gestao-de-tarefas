@@ -11,7 +11,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     // Configuração global de variáveis de ambiente
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.example',
+      envFilePath: '.env',
     }),
 
     // TypeORM conectado ao PostgreSQL

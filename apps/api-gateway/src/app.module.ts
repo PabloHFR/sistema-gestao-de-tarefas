@@ -11,7 +11,7 @@ import { TasksModule } from './tasks/tasks.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.example',
+      envFilePath: '.env',
     }),
 
     // Rate limit: máximo de 10 requisições por segundo
